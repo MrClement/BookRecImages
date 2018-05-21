@@ -3,10 +3,12 @@ const csv = require("fast-csv");
 const Xray = require('x-ray');
 let x = Xray();
 
+const fs = require('fs');
+var output = fs.createWriteStream('out.csv', {
+    flags: 'a' // 'a' means appending (old data will be preserved)
+  });
 
-
-
-let rate = 10000;
+let rate = 20000;
 
 let fullData = [];
 csv
@@ -18,7 +20,7 @@ csv
      console.log("Parsed");
 
      let interval = setInterval(function() {
-         if(fullData.length > 511) {
+         if(fullData.length > 508) {
             let curRec = fullData.shift();
             getImage(curRec[5].trim(), curRec[6].trim());
          } else {
@@ -36,8 +38,13 @@ function getImage(title, author_last) {
   x(`https://www.google.com/search?tbm=isch&q=site%3Agoodreads.com+${titlePlus}+${author_last}`, '#search div table tr td',[{query: "a@href"}]).then(function (res) {
      let goodUrl = res[0].query.toString().slice(7);
      console.log(goodUrl);
-     x(goodUrl, "#imagecol div div a",[{html: "img@src"}]).then(function (res) {
-         console.log(res); //should be writing to a file here instead
+     x(goodUrl, "#imagecol div div a",[{link: "img@src"}]).then(function (res) {
+         console.log(res);
+         if(res && res[0]) {
+            output.write(`${res[0].link}\n`);
+         } else {
+            output.write(`Not found\n`);
+         }
      });
    });
 }
