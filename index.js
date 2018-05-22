@@ -22,7 +22,9 @@ csv
      let interval = setInterval(function() {
          if(fullData.length > 0) {
             let curRec = fullData.shift();
-            getImage(curRec[5].trim(), curRec[6].trim());
+            if(curRec[4] === "" || curRec[4] === "Not found") {
+                getImage(curRec[5].trim(), curRec[6].trim());
+            }
          } else {
              clearInterval(interval);
          }
